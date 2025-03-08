@@ -20,6 +20,9 @@ if System.get_env("PHX_SERVER") do
   config :dive, DiveWeb.Endpoint, server: true
 end
 
+config :dive, :openai, api_key: System.get_env("DIVE_OPENAI_API_KEY")
+config :dive, :crawl4ai, api_token: System.get_env("DIVE_CRAWL4AI_API_TOKEN")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

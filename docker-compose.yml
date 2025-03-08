@@ -1,0 +1,24 @@
+---
+services:
+  searxng:
+    image: searxng/searxng
+    ports:
+      - 8081:8080
+    volumes:
+      - ./searxng:/etc/searxng
+    restart: on-failure:0
+    environment:
+      BASE_URL: "http://localhost:8081/"
+      INSTANCE_NAME: "dive_search"
+
+  crawl4ai:
+    image: unclecode/crawl4ai:basic-arm64
+    ports:
+      - 11235:11235
+    volumes:
+      - ./.crawl4ai:/dev/shm
+    environment:
+      - CRAWL4AI_API_TOKEN=${DIVE_CRAWL4AI_API_TOKEN:-}
+    
+
+

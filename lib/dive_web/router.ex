@@ -18,6 +18,13 @@ defmodule DiveWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+
+    live "/topics", TopicLive.Index, :index
+    live "/topics/new", TopicLive.Index, :new
+    live "/topics/:id/edit", TopicLive.Index, :edit
+
+    live "/topics/:id", TopicLive.Show, :show
+    live "/topics/:id/show/edit", TopicLive.Show, :edit
   end
 
   # Other scopes may use custom stacks.
