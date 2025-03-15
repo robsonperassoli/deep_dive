@@ -58,7 +58,8 @@ defmodule Dive.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:req, "~> 0.5.8"},
-      {:floki, "~> 0.37.0"}
+      {:floki, "~> 0.37.0"},
+      {:earmark, "~> 1.4.47"}
     ]
   end
 

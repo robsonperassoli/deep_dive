@@ -6,21 +6,15 @@ defmodule Dive.Research.Researcher do
   alias Dive.Research.Topic
   alias Dive.OpenAI
 
-  def search(search_topic) do
-    {:ok, topic} =
-      Dive.Research.create_topic(%{
-        text: search_topic
-      })
-
+  def search(%Topic{} = topic) do
     search_terms = get_search_query(topic.text)
 
     search_results =
       search_terms
       |> Enum.map(&Task.async(fn -> search_web(&1) end))
       |> Task.await_many(60_000)
-      |> Enum.flat_map(& &1)
+      |> List.flatten()
       |> Enum.uniq_by(& &1["url"])
-
 
     now = DateTime.utc_now() |> DateTime.truncate(:second)
 
@@ -49,14 +43,14 @@ defmodule Dive.Research.Researcher do
         max_concurrency: 4
       )
       |> Enum.to_list()
-      |> Enum.filter(& elem(&1, 0) === :ok)
-      |> Enum.map(& elem(&1, 1))
+      |> Enum.filter(&(elem(&1, 0) === :ok))
+      |> Enum.map(&elem(&1, 1))
       |> Task.async_stream(__MODULE__, :summarize_source, [topic],
         timeout: 60_000,
         max_concurrency: 4
       )
-      |> Enum.filter(& elem(&1, 0) === :ok)
-      |> Enum.map(& elem(&1, 1))
+      |> Enum.filter(&(elem(&1, 0) === :ok))
+      |> Enum.map(&elem(&1, 1))
       |> Enum.reject(&is_nil(&1.summary))
       |> Enum.map(&web_page_summary(&1.url, &1.title, &1.summary))
 
@@ -68,7 +62,7 @@ defmodule Dive.Research.Researcher do
       report: final_report
     })
 
-    IO.puts(final_report)
+    {:ok, topic}
   end
 
   def search_web(search_term) do

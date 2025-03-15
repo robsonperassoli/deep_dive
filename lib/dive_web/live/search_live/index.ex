@@ -1,4 +1,4 @@
-defmodule DiveWeb.TopicLive.Index do
+defmodule DiveWeb.SearchLive.Index do
   use DiveWeb, :live_view
 
   alias Dive.Research
@@ -14,12 +14,6 @@ defmodule DiveWeb.TopicLive.Index do
     {:noreply, apply_action(socket, socket.assigns.live_action, params)}
   end
 
-  defp apply_action(socket, :edit, %{"id" => id}) do
-    socket
-    |> assign(:page_title, "Edit Topic")
-    |> assign(:topic, Research.get_topic!(id))
-  end
-
   defp apply_action(socket, :new, _params) do
     socket
     |> assign(:page_title, "New Topic")
@@ -32,8 +26,26 @@ defmodule DiveWeb.TopicLive.Index do
     |> assign(:topic, nil)
   end
 
+  defp apply_action(socket, :show, %{"id" => id}) do
+    topic = Research.get_topic!(id)
+
+    report_html =
+      if topic.report do
+        topic.report
+        |> String.split("\n")
+        |> Earmark.as_html!()
+      end
+
+    socket
+    |> assign(:page_title, topic.text)
+    |> assign(:report_html, report_html)
+    |> assign(:topic, topic)
+  end
+
   @impl true
-  def handle_info({DiveWeb.TopicLive.FormComponent, {:saved, topic}}, socket) do
+  def handle_info({DiveWeb.SearchLive.FormComponent, {:saved, topic}}, socket) do
+    # TODO: add socker process id to search to get notifications back
+    Dive.search(topic)
     {:noreply, stream_insert(socket, :topics, topic)}
   end
 

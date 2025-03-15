@@ -1,0 +1,53 @@
+<div class="h-screen bg-zinc-800 text-white flex max-h-screen max-w-screen">
+  <aside class="w-72 space-y-2 border-r border-indigo-500 h-full flex flex-col p-4">
+    <h2 class="text-lg font-medium">Dives</h2>
+    <nav class="flex-grow overflow-y-auto -mx-2">
+      <ul>
+        <%= for {_, topic} <- @streams.topics do %>
+          <li class="hover:bg-zinc-600 rounded flex items-center min-w-0">
+            <.link
+              navigate={~p"/topics/#{topic.id}"}
+              class="capitalize text-ellipsis truncate flex-grow px-2 py-1.5 text-base"
+            >
+              {topic.text}
+            </.link>
+
+            <.link
+              phx-click={JS.push("delete", value: %{id: topic.id}) |> hide("##{topic.id}")}
+              data-confirm="Are you sure?"
+              class="flex-shrink-0 block px-2 py-1"
+            >
+              🗑
+            </.link>
+          </li>
+        <% end %>
+      </ul>
+    </nav>
+
+    <.link
+      patch={~p"/topics/new"}
+      class="block w-full bg-indigo-800 text-white rounded-md px-4 py-2 text-center hover:bg-indigo-900"
+    >
+      New Topic
+    </.link>
+  </aside>
+  <main class="overflow-y-auto flex-grow min-w-0 p-4">
+    <%= if @live_action === :new do %>
+      <.live_component
+        module={DiveWeb.SearchLive.FormComponent}
+        id={:new}
+        title={@page_title}
+        action={@live_action}
+        topic={@topic}
+        patch={~p"/topics"}
+      />
+    <% end %>
+
+    <%= if @live_action === :show do %>
+      <h2 class="text-3xl font-medium">💭 {@topic.text}</h2>
+      <div class="md">
+        {raw(@report_html)}
+      </div>
+    <% end %>
+  </main>
+</div>

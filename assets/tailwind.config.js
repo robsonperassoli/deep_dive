@@ -12,6 +12,10 @@ module.exports = {
     "../lib/dive_web/**/*.*ex"
   ],
   theme: {
+    fontFamily: {
+      'sans': ['Poppins', 'ui-sans-serif', 'system-ui'],
+      'mono': ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', "Liberation Mono", "Courier New", 'monospace']
+    },
     extend: {
       colors: {
         brand: "#FD4F00",

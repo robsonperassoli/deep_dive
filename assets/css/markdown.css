@@ -1,0 +1,147 @@
+/* Markdown Styling with Tailwind 3.4 
+   Add the 'md' class to your container to apply these styles 
+   Designed to work with dark theme (uses default colors)
+*/
+
+@layer components {
+  /* Base container styling */
+  .md {
+    @apply max-w-none leading-normal;
+  }
+
+  /* Headings */
+  .md h1 {
+    @apply text-4xl font-bold mt-6 mb-4 pb-2 border-b;
+  }
+
+  .md h2 {
+    @apply text-3xl font-bold mt-8 mb-4;
+  }
+
+  .md h3 {
+    @apply text-2xl font-semibold mt-6 mb-3;
+  }
+
+  .md h4 {
+    @apply text-xl font-semibold mt-5 mb-2;
+  }
+
+  .md h5 {
+    @apply text-lg font-semibold mt-4 mb-2;
+  }
+
+  .md h6 {
+    @apply text-base font-semibold mt-4 mb-2;
+  }
+
+  /* Paragraphs and text elements */
+  .md p {
+    @apply mb-4 leading-relaxed;
+  }
+
+  .md strong {
+    @apply font-semibold;
+  }
+
+  .md em {
+    @apply italic;
+  }
+
+  .md a {
+    @apply underline hover:opacity-80;
+  }
+
+  /* Lists */
+  .md ul {
+    @apply list-disc pl-10 mb-4;
+  }
+
+  .md ol {
+    @apply list-decimal pl-10 mb-4;
+  }
+
+  .md li {
+    @apply mb-1;
+  }
+
+  .md li > ul,
+  .md li > ol {
+    @apply my-2;
+  }
+
+  /* Blockquotes */
+  .md blockquote {
+    @apply pl-4 italic border-l-4 mb-4;
+  }
+
+  /* Code blocks and inline code */
+  .md pre {
+    @apply p-4 rounded-lg overflow-x-auto mb-4 text-sm;
+  }
+
+  .md code {
+    @apply px-1 py-0.5 rounded text-sm font-mono;
+  }
+
+  .md pre code {
+    @apply p-0 rounded-none;
+  }
+
+  /* Tables */
+  .md table {
+    @apply w-full border-collapse mb-4;
+  }
+
+  .md th {
+    @apply border px-4 py-2 text-left font-semibold;
+  }
+
+  .md td {
+    @apply border px-4 py-2;
+  }
+
+  /* Horizontal rule */
+  .md hr {
+    @apply my-8 border-t;
+  }
+
+  /* Images */
+  .md img {
+    @apply max-w-full h-auto rounded-lg my-4;
+  }
+
+  /* Task lists */
+  .md ul[data-type="taskList"] {
+    @apply list-none pl-0;
+  }
+
+  .md ul[data-type="taskList"] li {
+    @apply flex items-center;
+  }
+
+  .md ul[data-type="taskList"] li > input {
+    @apply mr-2;
+  }
+
+  /* Definition lists */
+  .md dl {
+    @apply mb-4;
+  }
+
+  .md dt {
+    @apply font-semibold mb-1;
+  }
+
+  .md dd {
+    @apply pl-4 mb-4;
+  }
+
+  /* Image captions */
+  .md figure {
+    @apply mb-6;
+  }
+
+  .md figcaption {
+    @apply text-sm text-center mt-2;
+  }
+}
