@@ -25,13 +25,13 @@
     </nav>
 
     <.link
-      patch={~p"/topics/new"}
+      navigate={~p"/topics/new"}
       class="block w-full bg-indigo-800 text-white rounded-md px-4 py-2 text-center hover:bg-indigo-900"
     >
       New Topic
     </.link>
   </aside>
-  <main class="overflow-y-auto flex-grow min-w-0 p-4">
+  <main class="overflow-y-auto flex-grow min-w-0 p-6">
     <%= if @live_action === :new do %>
       <.live_component
         module={DiveWeb.SearchLive.FormComponent}
@@ -39,13 +39,20 @@
         title={@page_title}
         action={@live_action}
         topic={@topic}
-        patch={~p"/topics"}
       />
     <% end %>
 
     <%= if @live_action === :show do %>
       <h2 class="text-3xl font-medium">💭 {@topic.text}</h2>
-      <div class="md">
+
+      <%= if is_list(@current_search) do %>
+        <ul>
+          <%= for notification <- @current_search do %>
+            <li>{notification}</li>
+          <% end %>
+        </ul>
+      <% end %>
+      <div class="md max-w-screen-lg">
         {raw(@report_html)}
       </div>
     <% end %>

@@ -6,12 +6,23 @@ defmodule Dive.Research.Researcher do
   alias Dive.Research.Topic
   alias Dive.OpenAI
 
-  def search(%Topic{} = topic) do
+  def search(%Topic{} = topic, listener_pid) do
+    notify_listener(listener_pid, "Research started, coming up with good web searches")
     search_terms = get_search_query(topic.text)
 
     search_results =
       search_terms
-      |> Enum.map(&Task.async(fn -> search_web(&1) end))
+      |> Enum.map(
+        &Task.async(fn ->
+          notify_listener(listener_pid, "🔎 Searching for #{&1}")
+
+          results = search_web(&1)
+
+          notify_listener(listener_pid, "🔎 Found #{Enum.count(results)} results for #{&1}")
+
+          results
+        end)
+      )
       |> Task.await_many(60_000)
       |> List.flatten()
       |> Enum.uniq_by(& &1["url"])
@@ -38,14 +49,14 @@ defmodule Dive.Research.Researcher do
 
     sources =
       topic.sources
-      |> Task.async_stream(__MODULE__, :fetch_source_content, [],
+      |> Task.async_stream(__MODULE__, :fetch_source_content, [listener_pid],
         timeout: 120_000,
         max_concurrency: 4
       )
       |> Enum.to_list()
       |> Enum.filter(&(elem(&1, 0) === :ok))
       |> Enum.map(&elem(&1, 1))
-      |> Task.async_stream(__MODULE__, :summarize_source, [topic],
+      |> Task.async_stream(__MODULE__, :summarize_source, [topic, listener_pid],
         timeout: 60_000,
         max_concurrency: 4
       )
@@ -54,6 +65,8 @@ defmodule Dive.Research.Researcher do
       |> Enum.reject(&is_nil(&1.summary))
       |> Enum.map(&web_page_summary(&1.url, &1.title, &1.summary))
 
+    notify_listener(listener_pid, "🧠 Research done, building report.")
+
     final_report =
       final_report(topic.text, sources)
 
@@ -61,6 +74,8 @@ defmodule Dive.Research.Researcher do
     |> Dive.Research.update_topic(%{
       report: final_report
     })
+
+    notify_listener(listener_pid, :finished)
 
     {:ok, topic}
   end
@@ -72,7 +87,9 @@ defmodule Dive.Research.Researcher do
     |> Enum.map(&Map.put(&1, "search_term", search_term))
   end
 
-  def fetch_source_content(%Source{} = source) do
+  def fetch_source_content(%Source{} = source, listener_pid) do
+    notify_listener(listener_pid, "🌐 Checking #{source.title}")
+
     %{"task_id" => task_id} = Crawl4AI.crawl(source.url)
 
     {:ok, source} = Dive.Research.update_source(source, %{crawl_task_id: task_id})
@@ -88,11 +105,15 @@ defmodule Dive.Research.Researcher do
     |> then(&elem(&1, 1))
   end
 
-  def summarize_source(%Source{raw: raw} = source, %Topic{text: text}) do
+  def summarize_source(%Source{raw: raw, title: title} = source, %Topic{text: text}, listener_pid) do
+    notify_listener(listener_pid, "🧠 Summarizing contents of #{title}")
+
     crawl = Jason.decode!(raw)
 
     summary =
       summarize_page(text, crawl["result"]["markdown_v2"]["markdown_with_citations"])
+
+    notify_listener(listener_pid, "✅ Summary of #{title} ready")
 
     source
     |> Dive.Research.update_source(%{
@@ -275,5 +296,17 @@ defmodule Dive.Research.Researcher do
       |> Map.get("message")
       |> Map.get("content")
     end)
+  end
+
+  def notify_listener(nil, _message), do: :noop
+
+  def notify_listener(pid, message) do
+    if Process.alive?(pid) do
+      send(pid, {__MODULE__, message})
+    else
+      Logger.warning("[#{__MODULE__}] Cannot notify listener, process not alive...",
+        message: message
+      )
+    end
   end
 end

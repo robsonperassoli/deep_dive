@@ -7,7 +7,7 @@ defmodule Dive do
   if it comes from the database, an external API or others.
   """
 
-  def search(topic) do
-    Dive.Research.Researcher.search(topic)
+  def search(topic, listener_pid) do
+    Dive.Research.Researcher.search(topic, listener_pid)
   end
 end
