@@ -7,7 +7,7 @@ defmodule Dive.Research.Researcher do
   alias Dive.OpenAI
 
   def search(%Topic{} = topic, listener_pid) do
-    notify_listener(listener_pid, "Research started, coming up with good web searches")
+    notify_listener(listener_pid, "🧠 Research started, coming up with good web searches")
     search_terms = get_search_query(topic.text)
 
     search_results =
@@ -51,14 +51,16 @@ defmodule Dive.Research.Researcher do
       topic.sources
       |> Task.async_stream(__MODULE__, :fetch_source_content, [listener_pid],
         timeout: 120_000,
-        max_concurrency: 4
+        max_concurrency: 4,
+        on_timeout: :kill_task
       )
       |> Enum.to_list()
       |> Enum.filter(&(elem(&1, 0) === :ok))
       |> Enum.map(&elem(&1, 1))
       |> Task.async_stream(__MODULE__, :summarize_source, [topic, listener_pid],
         timeout: 60_000,
-        max_concurrency: 4
+        max_concurrency: 4,
+        on_timeout: :kill_task
       )
       |> Enum.filter(&(elem(&1, 0) === :ok))
       |> Enum.map(&elem(&1, 1))

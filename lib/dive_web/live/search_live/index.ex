@@ -25,7 +25,7 @@ defmodule DiveWeb.SearchLive.Index do
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Listing Topics")
-    |> assign(:topic, nil)
+    |> assign(:topic, %Topic{})
     |> assign(:current_search, nil)
   end
 
