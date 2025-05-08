@@ -60,7 +60,6 @@ defmodule DiveWeb.SearchLive.FormComponent do
 
         {:noreply,
          socket
-         |> put_flash(:info, "Topic created successfully")
          |> push_patch(to: ~p"/topics/#{topic.id}")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
